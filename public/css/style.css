@@ -7,31 +7,35 @@
 }
 
 body {
-    background-color: #f7f7f7;
+    background-color: #F1F1F1;
     color: #333;
     line-height: 1.6;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .container {
-    max-width: 900px;
-    margin: 20px auto;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 40px);
-    background-color: white;
+    background-color: #F1F1F1;
 }
 
 /* Cabeçalho */
 header {
-    background-color: #4b367c;
-    color: white;
+    background-color: #ffffff;
+    color: #444;
     padding: 15px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
 }
 
 header h1 {
@@ -49,9 +53,10 @@ header h1 {
 
 .model-selector select {
     padding: 5px 10px;
-    border-radius: 5px;
+    border-radius: 15px;
     border: none;
-    background-color: #ffffff;
+    background-color: #fbfbfb;
+    border-color: #aaaaaa;
     color: #333;
     font-size: 0.9rem;
 }
@@ -62,23 +67,33 @@ header h1 {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    margin-top: 60px; /* Espaço para o cabeçalho fixo */
+    margin-bottom: 70px; /* Espaço para a área de entrada fixa (reduzido) */
+    height: calc(100vh - 130px);
+    padding: 0 10px;
 }
 
 .messages {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: 25px 15px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    background-color: #f8f8f8;
+    gap: 5px;
+    background-color: #F1F1F1;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    border-radius: 10px;
 }
 
 .message {
     max-width: 80%;
-    padding: 10px;
-    border-radius: 10px;
+    padding: 18px;
+    border-radius: 18px;
     animation: fadeIn 0.3s ease-in-out;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    margin-bottom: 15px;
 }
 
 @keyframes fadeIn {
@@ -88,24 +103,26 @@ header h1 {
 
 .message.user {
     align-self: flex-end;
-    background-color: #e1f5fe;
+    background-color: #E5E5E5;
+    border-radius: 18px 18px 5px 18px;
 }
 
 .message.bot {
     align-self: flex-start;
-    background-color: #f1f1f1;
+    background-color: #ffffff;
+    border-radius: 18px 18px 18px 5px;
 }
 
 .message-content {
     display: flex;
-    gap: 10px;
+    gap: 12px;
 }
 
 .avatar {
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background-color: #4b367c;
+    background-color: #666;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -115,7 +132,7 @@ header h1 {
 }
 
 .message.user .avatar {
-    background-color: #2196f3;
+    background-color: #666;
 }
 
 .text {
@@ -177,7 +194,7 @@ header h1 {
 }
 
 .text code {
-    background-color: #f0f0f0;
+    background-color: #E5E5E5;
     padding: 2px 4px;
     border-radius: 4px;
     font-family: monospace;
@@ -195,44 +212,59 @@ header h1 {
 
 /* Área de entrada */
 .input-area {
-    padding: 15px;
+    padding: 10px 15px;
     display: flex;
     gap: 10px;
     background-color: white;
-    border-top: 1px solid #eaeaea;
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    max-width: 600px;
+    margin: 0 auto;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 80px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    border: none;
 }
 
 textarea {
     flex: 1;
-    padding: 12px 15px;
-    border-radius: 25px;
-    border: 1px solid #ddd;
+    padding: 10px 12px;
+    border-radius: 80px;
+    border: 1px solid #eaeaea;
     resize: none;
     outline: none;
-    transition: border 0.3s;
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    font-size: 0.95rem;
 }
 
 textarea:focus {
-    border-color: #4b367c;
+    border-color: #00000041;
 }
 
 button {
     width: 45px;
     height: 45px;
-    border-radius: 50%;
+    border-radius: 50px;
     border: none;
-    background-color: #4b367c;
+    background-color: #666;
     color: white;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 button:hover {
-    background-color: #5a4390;
+    background-color: #888;
     transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 button:disabled {
@@ -244,12 +276,29 @@ button:disabled {
 /* Barra de status */
 .status-bar {
     padding: 8px 15px;
-    background-color: #f1f1f1;
-    border-top: 1px solid #e0e0e0;
+    background-color: #F1F1F1;
     display: flex;
     justify-content: space-between;
     font-size: 0.8rem;
     color: #666;
+    width: 100%;
+    border-radius: 10px;
+}
+
+.message.status-message {
+    width: 100%;
+    max-width: 100%;
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
+    margin-bottom: 20px;
+    border-radius: 0;
+}
+
+.message.status-message .status-bar {
+    background-color: #F1F1F1;
+    border-radius: 18px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .api-status {
@@ -280,7 +329,7 @@ button:disabled {
 }
 
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: #F1F1F1;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -295,18 +344,31 @@ button:disabled {
 /* Estilos para responsividade */
 @media (max-width: 768px) {
     .container {
-        margin: 10px;
-        height: calc(100vh - 20px);
-        border-radius: 8px;
+        width: 100%;
+        height: 100vh;
     }
     
     header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
+        padding: 10px 15px;
+    }
+    
+    .chat-container {
+        margin-top: 60px;
+    }
+    
+    .messages {
+        padding: 15px 10px;
     }
     
     .message {
         max-width: 90%;
+    }
+    
+    .input-area {
+        padding: 10px;
+    }
+    
+    .status-bar {
+        padding: 5px 10px;
     }
 }
