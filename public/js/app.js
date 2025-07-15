@@ -1,15 +1,18 @@
 // Configuração e constantes
 const OLLAMA_API_URL = 'http://localhost:11434/api';
-const modelSelect = document.getElementById('model');
 const messagesContainer = document.getElementById('messages');
 const userInput = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
 const statusElement = document.getElementById('status');
 const apiStatusElement = document.getElementById('api-status');
+const modelButton = document.getElementById('model-button');
+const modelDropdown = document.getElementById('model-dropdown');
 
 // Estados da aplicação
 let isGenerating = false;
 let currentController = null;
+let selectedModel = 'llama2'; // Modelo padrão
+let availableModels = [];
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
@@ -25,6 +28,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     sendButton.addEventListener('click', handleUserMessage);
+    
+    // Event listeners para o dropdown de modelos
+    modelButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleModelDropdown();
+    });
+    
+    // Fechar dropdown ao clicar fora
+    document.addEventListener('click', () => {
+        closeModelDropdown();
+    });
+    
+    // Event listeners para itens do dropdown
+    modelDropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (e.target.classList.contains('dropdown-item')) {
+            selectModel(e.target.dataset.model, e.target.textContent);
+        }
+    });
 });
 
 // Função para verificar status do servidor Ollama
@@ -58,27 +80,56 @@ function setApiOffline() {
 
 // Atualizar lista de modelos disponíveis
 function updateAvailableModels(models) {
-    // Salvar o modelo selecionado atualmente
-    const currentModel = modelSelect.value;
+    availableModels = models;
     
-    // Limpar seletor
-    modelSelect.innerHTML = '';
+    // Limpar dropdown
+    modelDropdown.innerHTML = '';
     
     // Adicionar modelos disponíveis
     models.forEach(model => {
-        const option = document.createElement('option');
-        option.value = model.name;
-        option.textContent = model.name;
-        modelSelect.appendChild(option);
+        const dropdownItem = document.createElement('div');
+        dropdownItem.className = 'dropdown-item';
+        dropdownItem.dataset.model = model.name;
+        dropdownItem.textContent = model.name;
+        
+        // Marcar como selecionado se for o modelo atual
+        if (model.name === selectedModel) {
+            dropdownItem.classList.add('selected');
+        }
+        
+        modelDropdown.appendChild(dropdownItem);
     });
     
-    // Tentar restaurar a seleção anterior ou usar o primeiro disponível
-    if (models.some(m => m.name === currentModel)) {
-        modelSelect.value = currentModel;
+    // Se o modelo selecionado não estiver disponível, usar o primeiro
+    if (!models.some(m => m.name === selectedModel) && models.length > 0) {
+        selectedModel = models[0].name;
+        updateSelectedModel();
     }
-    
-    // Habilitar o select
-    modelSelect.disabled = false;
+}
+
+// Funções para controlar o dropdown
+function toggleModelDropdown() {
+    modelDropdown.classList.toggle('show');
+    modelButton.classList.toggle('active');
+}
+
+function closeModelDropdown() {
+    modelDropdown.classList.remove('show');
+    modelButton.classList.remove('active');
+}
+
+function selectModel(modelName, displayName) {
+    selectedModel = modelName;
+    updateSelectedModel();
+    closeModelDropdown();
+}
+
+function updateSelectedModel() {
+    // Atualizar seleção visual no dropdown
+    const items = modelDropdown.querySelectorAll('.dropdown-item');
+    items.forEach(item => {
+        item.classList.toggle('selected', item.dataset.model === selectedModel);
+    });
 }
 
 // Função para lidar com mensagens do usuário
@@ -98,7 +149,7 @@ function handleUserMessage() {
 }
 
 // Função para adicionar mensagem ao chat
-function addMessageToChat(role, content, isStreaming = false) {
+function addMessageToChat(role, content, isStreaming = false, stats = null) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${role}`;
     
@@ -127,6 +178,26 @@ function addMessageToChat(role, content, isStreaming = false) {
     messageContent.appendChild(textDiv);
     messageDiv.appendChild(messageContent);
     
+    // Adicionar estatísticas se fornecidas (apenas para mensagens do bot)
+    if (stats && role === 'bot') {
+        const statsDiv = document.createElement('div');
+        statsDiv.className = 'message-stats';
+        statsDiv.innerHTML = `
+            <div class="stats-item">
+                <i class="fas fa-clock"></i>
+                <span>Duration: ${stats.duration}s</span>
+            </div>
+            <div class="stats-item">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Speed: ${stats.tokensPerSecond} tokens/s</span>
+            </div>
+            <div class="stats-item">
+                <i class="fas fa-cubes"></i>
+                <span>Total Tokens: ${stats.totalTokens}</span>
+            </div>
+        `;
+        messageDiv.appendChild(statsDiv);
+    }
     messagesContainer.appendChild(messageDiv);
     
     // Rolar para o final
@@ -226,8 +297,6 @@ function escapeHtml(text) {
 
 // Função para gerar resposta usando Ollama API
 async function generateResponse(prompt) {
-    const selectedModel = modelSelect.value;
-    
     // Atualizar estado
     isGenerating = true;
     sendButton.disabled = true;
@@ -237,6 +306,11 @@ async function generateResponse(prompt) {
     addMessageToChat('bot', '▌', true);
     
     let fullResponse = '';
+    let startTime = Date.now();
+    let endTime = null;
+    let totalTokens = 0;
+    let evalCount = 0;
+    let evalDuration = 0;
     
     // Criar controller para poder cancelar a requisição
     currentController = new AbortController();
@@ -283,6 +357,11 @@ async function generateResponse(prompt) {
                     }
                     
                     if (json.done) {
+                        endTime = Date.now();
+                        // Capturar estatísticas do Ollama
+                        if (json.eval_count) evalCount = json.eval_count;
+                        if (json.eval_duration) evalDuration = json.eval_duration;
+                        totalTokens = json.eval_count || estimateTokens(fullResponse);
                         break;
                     }
                 } catch (e) {
@@ -291,9 +370,21 @@ async function generateResponse(prompt) {
             }
         }
         
-        // Atualizar a mensagem final
-        streamingElement.innerHTML = formatMessage(fullResponse);
-        streamingElement.removeAttribute('id');
+        // Calcular estatísticas
+        const duration = (endTime - startTime) / 1000; // em segundos
+        const tokensPerSecond = totalTokens > 0 ? (totalTokens / duration).toFixed(1) : 'N/A';
+        
+        const stats = {
+            duration: duration.toFixed(2),
+            tokensPerSecond: tokensPerSecond,
+            totalTokens: totalTokens
+        };
+        
+        // Remover a mensagem de streaming
+        streamingElement.remove();
+        
+        // Adicionar mensagem final com estatísticas
+        addMessageToChat('bot', fullResponse, false, stats);
         
     } catch (error) {
         if (error.name === 'AbortError') {
@@ -315,6 +406,12 @@ async function generateResponse(prompt) {
         statusElement.textContent = 'Pronto';
         currentController = null;
     }
+}
+
+// Função auxiliar para estimar tokens quando não fornecido pelo servidor
+function estimateTokens(text) {
+    // Estimativa simples: aproximadamente 4 caracteres por token
+    return Math.ceil(text.length / 4);
 }
 
 // Funcionalidade para cancelar a geração
