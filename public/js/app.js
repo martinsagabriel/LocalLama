@@ -7,15 +7,20 @@ const statusElement = document.getElementById('status');
 const apiStatusElement = document.getElementById('api-status');
 const modelButton = document.getElementById('model-button');
 const modelDropdown = document.getElementById('model-dropdown');
+const themeToggle = document.getElementById('theme-toggle');
 
 // Estados da aplicação
 let isGenerating = false;
 let currentController = null;
 let selectedModel = 'llama2'; // Modelo padrão
 let availableModels = [];
+let currentTheme = localStorage.getItem('theme') || 'light';
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar tema
+    initializeTheme();
+    
     checkOllamaStatus();
     setInterval(checkOllamaStatus, 30000);
     
@@ -34,6 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation();
         toggleModelDropdown();
     });
+    
+    // Event listener para troca de tema
+    themeToggle.addEventListener('click', toggleTheme);
     
     // Fechar dropdown ao clicar fora
     document.addEventListener('click', () => {
@@ -130,6 +138,30 @@ function updateSelectedModel() {
     items.forEach(item => {
         item.classList.toggle('selected', item.dataset.model === selectedModel);
     });
+}
+
+// Funções para controlar temas
+function initializeTheme() {
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    updateThemeIcon();
+}
+
+function toggleTheme() {
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    localStorage.setItem('theme', currentTheme);
+    updateThemeIcon();
+}
+
+function updateThemeIcon() {
+    const icon = themeToggle.querySelector('i');
+    if (currentTheme === 'dark') {
+        icon.className = 'fas fa-sun';
+        themeToggle.title = 'Alternar para tema claro';
+    } else {
+        icon.className = 'fas fa-moon';
+        themeToggle.title = 'Alternar para tema escuro';
+    }
 }
 
 // Função para lidar com mensagens do usuário
