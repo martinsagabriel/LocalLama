@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -14,7 +14,7 @@
     <div class="container">
         <header>
             <h1>LocalLama</h1>
-            <button id="theme-toggle" class="theme-toggle" title="Alternar tema">
+            <button id="theme-toggle" class="theme-toggle" title="Toggle theme">
                 <i class="fas fa-moon"></i>
             </button>
         </header>
@@ -22,8 +22,8 @@
             <div class="messages" id="messages">
                 <div class="message bot status-message">
                     <div class="status-bar">
-                        <div id="status">Pronto</div>
-                        <div id="api-status" class="api-status offline">Ollama: Desconectado</div>
+                        <div id="status">Ready</div>
+                        <div id="api-status" class="api-status offline">Ollama: Disconnected</div>
                     </div>
                 </div>
             </div>
@@ -36,7 +36,7 @@
                         <div class="dropdown-item" data-model="gemma">Gemma</div>
                     </div>
                 </button>
-                <textarea id="user-input" placeholder="Digite sua mensagem aqui..." rows="1"></textarea>
+                <textarea id="user-input" placeholder="Type your message here..." rows="1"></textarea>
                 <button id="send-button"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>

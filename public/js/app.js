@@ -68,7 +68,7 @@ async function checkOllamaStatus() {
         if (response.ok) {
             const data = await response.json();
             apiStatusElement.className = 'api-status online';
-            apiStatusElement.textContent = `Ollama: Conectado (${data.models.length} modelos)`;
+            apiStatusElement.textContent = `Ollama: Connected (${data.models.length} models)`;
             
             // Atualizar lista de modelos disponíveis
             updateAvailableModels(data.models);
@@ -83,7 +83,7 @@ async function checkOllamaStatus() {
 // Função para marcar API como offline
 function setApiOffline() {
     apiStatusElement.className = 'api-status offline';
-    apiStatusElement.textContent = 'Ollama: Desconectado';
+    apiStatusElement.textContent = 'Ollama: Disconnected';
 }
 
 // Atualizar lista de modelos disponíveis
@@ -397,7 +397,7 @@ async function generateResponse(prompt) {
                         break;
                     }
                 } catch (e) {
-                    console.error('Erro ao processar JSON:', e);
+                    console.error('Error processing JSON:', e);
                 }
             }
         }
@@ -420,14 +420,14 @@ async function generateResponse(prompt) {
         
     } catch (error) {
         if (error.name === 'AbortError') {
-            console.log('Requisição cancelada');
+            console.log('Request cancelled');
         } else {
-            console.error('Erro ao gerar resposta:', error);
+            console.error('Error generating response:', error);
             
             // Atualizar a mensagem de erro
             const streamingElement = document.getElementById('streaming-message');
             if (streamingElement) {
-                streamingElement.innerHTML = 'Erro ao conectar com o servidor Ollama. Verifique se o serviço está rodando.';
+                streamingElement.innerHTML = 'Error connecting to Ollama server. Please check if the service is running.';
                 streamingElement.removeAttribute('id');
             }
         }
@@ -435,7 +435,7 @@ async function generateResponse(prompt) {
         // Restaurar estado
         isGenerating = false;
         sendButton.disabled = false;
-        statusElement.textContent = 'Pronto';
+        statusElement.textContent = 'Ready';
         currentController = null;
     }
 }
